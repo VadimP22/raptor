@@ -117,6 +117,7 @@ class Endpoint():
         
     def function(self, f):
         self.functions[f.__name__] = f
+        return f
 
 
     def process_json(self, json_text: str) -> str:
@@ -151,6 +152,4 @@ class Endpoint():
         except Exception as e:
             return make_response(str(e), e.__class__.__name__)
 
-
-        return make_response([1, 2, 3])
 
