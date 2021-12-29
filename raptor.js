@@ -67,7 +67,6 @@ class RemoteServer {
                     return target.functions.get(prop)
                 }
 
-                console.log("creating")
                 let func = function() {
                     let args_array = []
                     for (const arg of arguments) {

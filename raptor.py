@@ -110,6 +110,7 @@ def make_response(return_object,  exception: str = "") -> str:
 
         return response_json
 
+
 class Endpoint():
     def __init__(self, token: str = "public") -> None:
         self.acceptible_token = token
@@ -118,7 +119,6 @@ class Endpoint():
     def function(self, f):
         self.functions[f.__name__] = f
         return f
-
 
     def process_json(self, json_text: str) -> str:
         try:
