@@ -1,3 +1,4 @@
+from types import NoneType
 import requests
 import json
 
@@ -51,6 +52,7 @@ class RemoteFunction():
 
         if response.status_code != 200:
             raise InvalidHTTPStatus
+            return
 
         try:
             response_object = json.loads(response.text)
@@ -98,15 +100,57 @@ class RemoteServer():
             item.endpoint = new_endpoint
             item.token = new_token
 
-            
 
-if __name__ == "__main__":
-    server = RemoteServer("http://127.0.0.1:5000/", "token")
-    azaza = server.func(33, "ffew", lol="33")
-    azaza = server.func(355, "ffew", lol="33")
-    azaza = server.func(34, "ffff", lol="334")
-    print(type(azaza))
-    print(azaza)
-    print(server.tee(455))
+def make_response(return_object,  exception: str = "") -> str:
+        response = {}
+        response["exception"] = exception
+        response["return"] = return_object
+
+        response_json = json.dumps(response)
+
+        return response_json
+
+class Endpoint():
+    def __init__(self, token: str = "public") -> None:
+        self.acceptible_token = token
+        self.functions = {}
+        
+    def function(self, f):
+        self.functions[f.__name__] = f
+
+
+    def process_json(self, json_text: str) -> str:
+        try:
+            request_object = json.loads(json_text)
+        except:
+            return make_response("NoneType", "InvalidJson")
+
+        try:
+            recieved_token = request_object["token"]
+            function_name = request_object["function"]["name"]
+            function_args = request_object["function"]["args"]
+            function_kwargs = request_object["function"]["kwargs"]
+        except:
+            return make_response("NoneType", "InvalidRequestObject")
+
+        if recieved_token != self.acceptible_token:
+            return make_response("NoneType", "InvalidToken")
+
+        try:
+            fun = self.functions[function_name]
+        except:
+            return make_response("NoneType", "InvalidFunctionName")
 
         
+        try:
+            response_object = fun.__call__(*function_args, **function_kwargs)
+            if response_object == NoneType:
+                return make_response("NoneType")
+            else:
+                return make_response(response_object)
+        except Exception as e:
+            return make_response(str(e), e.__class__.__name__)
+
+
+        return make_response([1, 2, 3])
+
